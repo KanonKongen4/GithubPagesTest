@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mockup company website - dehumidifier visualizer</title>
+  <meta name="robots" content="noindex">
+  <title>Mockup-hjemmeside - visualisering af affugter</title>
   <style>
     :root {
       --ink: #14232c;
@@ -13,10 +14,8 @@
       --soft: #f3f6f8;
       --accent: #3f8fbf;
       --accent-dark: #2c6f99;
-      --deep: #16323f;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -35,25 +34,16 @@
       border-bottom: 1px solid var(--line);
     }
     header.site .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
-    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; letter-spacing: .01em; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; letter-spacing: .01em; white-space: nowrap; }
     .logo svg { width: 28px; height: 28px; color: var(--accent); }
     nav.main { display: flex; gap: 28px; font-size: 15px; color: var(--muted); }
     nav.main a:hover { color: var(--ink); }
-    .btn {
-      display: inline-block; padding: 11px 22px; border-radius: 8px; font-weight: 600; font-size: 15px;
-      background: var(--accent); color: #fff; transition: background .15s;
-    }
-    .btn:hover { background: var(--accent-dark); }
-    .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
-    .btn.ghost:hover { background: var(--soft); }
 
     /* Hero */
-    .hero { padding: 72px 0 40px; background: linear-gradient(180deg, var(--soft), #fff); }
+    .hero { padding: 64px 0 36px; background: linear-gradient(180deg, var(--soft), #fff); }
     .hero .wrap { max-width: 860px; text-align: center; }
     .eyebrow { color: var(--accent-dark); font-weight: 600; letter-spacing: .12em; font-size: 13px; text-transform: uppercase; }
-    h1 { font-size: clamp(34px, 5vw, 54px); line-height: 1.08; margin: 14px 0 18px; letter-spacing: -.02em; }
-    .lead { font-size: 19px; color: var(--muted); margin: 0 auto 30px; max-width: 640px; }
-    .hero .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    h1 { font-size: clamp(34px, 5vw, 54px); line-height: 1.08; margin: 14px 0 0; letter-spacing: -.02em; }
 
     /* Visualizer */
     .viz-section { padding: 8px 0 72px; }
@@ -68,35 +58,13 @@
       padding: 14px 4px 0; font-size: 14px; color: var(--muted);
     }
 
-    /* Sections */
-    section.block { padding: 72px 0; }
-    section.block.alt { background: var(--soft); }
-    h2 { font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 12px; letter-spacing: -.01em; }
-    .sub { color: var(--muted); max-width: 620px; margin: 0 0 40px; }
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 26px; }
-    .card .ico {
-      width: 42px; height: 42px; border-radius: 10px; background: #e6f1f8; color: var(--accent-dark);
-      display: grid; place-items: center; font-weight: 700; margin-bottom: 16px;
-    }
-    .card h3 { margin: 0 0 8px; font-size: 18px; }
-    .card p { margin: 0; color: var(--muted); font-size: 15px; }
-    .specs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center; }
-    .spec b { display: block; font-size: 34px; letter-spacing: -.02em; color: var(--deep); }
-    .spec span { color: var(--muted); font-size: 14px; }
-
-    .cta { background: var(--deep); color: #fff; text-align: center; padding: 64px 0; }
-    .cta p { color: #b8cbd6; margin: 0 0 24px; }
     footer { padding: 28px 0; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
     footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
     @media (max-width: 860px) {
       nav.main { display: none; }
-      .logo { white-space: nowrap; font-size: 18px; }
-      header.site .btn { padding: 9px 14px; font-size: 14px; white-space: nowrap; }
-      .grid { grid-template-columns: 1fr; }
-      .specs { grid-template-columns: repeat(2, 1fr); }
-      .hero { padding-top: 44px; }
+      .logo { font-size: 18px; }
+      .hero { padding-top: 40px; }
       .viz-frame iframe { height: 68vh; min-height: 420px; }
     }
   </style>
@@ -109,87 +77,45 @@
       <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M36 8C36 8 17 29 17 43.5C17 54.27 25.51 63 36 63C46.49 63 55 54.27 55 43.5C55 29 36 8 36 8Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
       </svg>
-      Company Name
+      Firmanavn
     </a>
     <nav class="main">
-      <a href="#visualizer">Explore</a>
-      <a href="#features">Features</a>
-      <a href="#specs">Specifications</a>
-      <a href="#contact">Contact</a>
+      <a href="#visualizer">Udforsk</a>
     </nav>
-    <a class="btn" href="#contact">Request a quote</a>
   </div>
 </header>
 
 <main id="top">
   <section class="hero">
     <div class="wrap">
-      <div class="eyebrow">Industrial dehumidification</div>
-      <h1>See exactly how it works, from every angle</h1>
-      <p class="lead">Rotate the machine, pull it apart, and follow the air and water through the system. No download needed.</p>
-      <div class="actions">
-        <a class="btn" href="#visualizer">Explore the machine</a>
-        <a class="btn ghost" href="#specs">View specifications</a>
-      </div>
+      <div class="eyebrow">Industriel affugtning</div>
+      <h1>Se præcis, hvordan den virker, fra alle vinkler</h1>
     </div>
   </section>
 
   <section class="viz-section" id="visualizer">
     <div class="wrap">
       <div class="viz-frame">
-        <!-- This is the embed exactly as described in docs/EMBEDDING.md -->
+        <!-- Indlejring som beskrevet i docs/EMBEDDING.md -->
         <iframe
           src="visualizer/index.html"
-          title="Machine visualizer"
+          title="Visualisering af maskinen"
           allow="fullscreen"
           allowfullscreen
           loading="lazy"></iframe>
       </div>
       <div class="viz-caption">
-        <span>Drag to rotate &middot; scroll or pinch to zoom</span>
-        <span>Interactive 3D model</span>
+        <span>Træk for at rotere &middot; scroll eller knib for at zoome</span>
+        <span>Interaktiv 3D-model</span>
       </div>
-    </div>
-  </section>
-
-  <section class="block alt" id="features">
-    <div class="wrap">
-      <h2>Built for demanding environments</h2>
-      <p class="sub">Placeholder text for the mockup. Replace with the real product story.</p>
-      <div class="grid">
-        <div class="card"><div class="ico">1</div><h3>High capacity</h3><p>Removes large volumes of moisture continuously, even in cold and humid conditions.</p></div>
-        <div class="card"><div class="ico">2</div><h3>Energy efficient</h3><p>Heat recovery keeps running costs low without compromising performance.</p></div>
-        <div class="card"><div class="ico">3</div><h3>Easy to service</h3><p>Every major part is reachable, so maintenance takes minutes instead of hours.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block" id="specs">
-    <div class="wrap">
-      <h2>Key figures</h2>
-      <p class="sub">Example numbers for layout only.</p>
-      <div class="specs">
-        <div class="spec"><b>120 L</b><span>per day capacity</span></div>
-        <div class="spec"><b>2.4 kW</b><span>power consumption</span></div>
-        <div class="spec"><b>58 dB</b><span>sound level</span></div>
-        <div class="spec"><b>IP 44</b><span>protection class</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta" id="contact">
-    <div class="wrap">
-      <h2>Want to see it in your building?</h2>
-      <p>Talk to our team about the right size and setup.</p>
-      <a class="btn" href="#top">Contact us</a>
     </div>
   </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <span>&copy; Company Name &middot; Mockup page for the visualizer embed</span>
-    <span>Privacy &middot; Terms</span>
+    <span>&copy; Firmanavn &middot; Mockup-side til visualiseringen</span>
+    <span>Privatliv &middot; Vilkår</span>
   </div>
 </footer>
 
