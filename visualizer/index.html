@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test_webglBuild</title>
+
+    <style>
+        :root {
+            --background: #f5f7f8;
+            --text: #24323a;
+            --muted: #71808a;
+            --accent: #3f8fbf;
+            --track: #dfe6ea;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        body {
+            background: var(--background);
+            font-family:
+                -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #game {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            border: 0;
+            outline: none;
+            /* Let the visualizer handle drags and pinches itself instead of
+               the browser scrolling or zooming the page. */
+            touch-action: none;
+        }
+
+        #loading {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: var(--background);
+            opacity: 1;
+            transition: opacity 350ms ease;
+        }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            width: min(420px, calc(100vw - 48px));
+            text-align: center;
+        }
+
+        .logo {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 28px;
+            color: var(--accent);
+        }
+
+        .logo svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--text);
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        .progress-wrap {
+            margin-top: 26px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 5px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: var(--track);
+        }
+
+        #progress {
+            width: 0%;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--accent);
+            transition: width 120ms ease-out;
+        }
+
+        #progress.indeterminate {
+            width: 35%;
+            animation: loading 1.25s ease-in-out infinite;
+        }
+
+        .status {
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @keyframes loading {
+            0% {
+                transform: translateX(-130%);
+            }
+            100% {
+                transform: translateX(390%);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #loading {
+                transition: none;
+            }
+
+            #progress {
+                transition: none;
+            }
+
+            #progress.indeterminate {
+                animation: none;
+                width: 70%;
+                margin-left: 15%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="game"></canvas>
+
+    <div id="loading" aria-live="polite">
+        <div class="loading-content">
+
+            <!-- Simple water-drop/dehumidifier icon. Replace this SVG if you have a company logo. -->
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 72 72" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M36 8C36 8 17 29 17 43.5C17 54.27 25.51 63 36 63C46.49 63 55 54.27 55 43.5C55 29 36 8 36 8Z"
+                        stroke="currentColor"
+                        stroke-width="4"
+                        stroke-linejoin="round"
+                    />
+                    <path
+                        d="M27 46C28.4 51.2 32 54 36.5 54"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                    />
+                </svg>
+            </div>
+
+            <h1>Indlæser visualiseringen</h1>
+
+            <div class="progress-wrap">
+                <div class="progress-track">
+                    <div id="progress" class="indeterminate"></div>
+                </div>
+                <div class="status" id="status">Forbereder...</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Load-time diagnostics. Always logs a summary to the console; add ?perf
+        // to the URL to also show it on screen (measure with DevTools CLOSED,
+        // since DevTools slows wasm compilation a lot).
+        // Times are ms since navigation start.
+        window.__perf = { marks: {}, longTasks: [], worstFrame: 0, slowFrames: 0, slowFrameLog: [], hiddenMs: 0, gpu: "?" };
+        (function () {
+            let hiddenSince = document.visibilityState === "hidden" ? performance.now() : null;
+            document.addEventListener("visibilitychange", function () {
+                if (document.visibilityState === "hidden") {
+                    hiddenSince = performance.now();
+                } else if (hiddenSince !== null) {
+                    window.__perf.hiddenMs += performance.now() - hiddenSince;
+                    hiddenSince = null;
+                }
+            });
+            try {
+                const gl = document.createElement("canvas").getContext("webgl2");
+                const ext = gl.getExtension("WEBGL_debug_renderer_info");
+                window.__perf.gpu = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "unknown";
+            } catch (e) { /* no WebGL2 */ }
+        })();
+        window.__perfMark = function (name) {
+            if (!(name in window.__perf.marks)) {
+                window.__perf.marks[name] = Math.round(performance.now());
+            }
+        };
+        window.__perfMark("shell-js");
+
+        try {
+            new PerformanceObserver(function (list) {
+                list.getEntries().forEach(function (e) {
+                    window.__perf.longTasks.push([Math.round(e.startTime), Math.round(e.duration)]);
+                });
+            }).observe({ type: "longtask", buffered: true });
+        } catch (e) { /* longtask API not available (e.g. Safari) */ }
+
+        window.__perfAfterStart = function () {
+            // Watch the first 5 s of rendering: shader compiles show up as slow frames.
+            let last = performance.now();
+            const end = last + 5000;
+            (function tick(now) {
+                const dt = now - last;
+                last = now;
+                if (dt > window.__perf.worstFrame) window.__perf.worstFrame = Math.round(dt);
+                if (dt > 50) {
+                    window.__perf.slowFrames++;
+                    if (window.__perf.slowFrameLog.length < 8) {
+                        window.__perf.slowFrameLog.push(Math.round(now) + " ms: " + Math.round(dt) + " ms frame");
+                    }
+                }
+                if (now < end) {
+                    requestAnimationFrame(tick);
+                } else {
+                    window.__perfReport();
+                }
+            })(last);
+        };
+
+        window.__perfReport = function () {
+            const p = window.__perf;
+            const res = {};
+            performance.getEntriesByType("resource").forEach(function (e) {
+                if (/\.(wasm|pck)/.test(e.name)) res[e.name.split("/").pop().split("?")[0] + " downloaded"] = Math.round(e.responseEnd);
+            });
+            const blocked = p.longTasks.reduce(function (s, t) { return s + t[1]; }, 0);
+            const lines = [];
+            Object.keys(res).forEach(function (k) { lines.push(k + ": " + res[k] + " ms"); });
+            Object.keys(p.marks).forEach(function (k) { lines.push(k + ": " + p.marks[k] + " ms"); });
+            lines.push("GPU: " + p.gpu);
+            lines.push("tab hidden during load: " + Math.round(p.hiddenMs) + " ms" + (p.hiddenMs > 500 ? "  <-- numbers below are NOT reliable, keep the tab in front" : ""));
+            lines.push("main thread blocked (long tasks): " + blocked + " ms in " + p.longTasks.length + " tasks");
+            lines.push("longest task: " + p.longTasks.reduce(function (m, t) { return Math.max(m, t[1]); }, 0) + " ms");
+            lines.push("first 5 s after start: worst frame " + p.worstFrame + " ms, " + p.slowFrames + " frames > 50 ms");
+            p.slowFrameLog.forEach(function (l) { lines.push("  slow frame @ " + l); });
+            console.info("[perf]\n" + lines.join("\n"));
+            if (/[?&]perf\b/.test(location.search)) {
+                let el = document.getElementById("perf-overlay");
+                if (!el) {
+                    el = document.createElement("pre");
+                    el.id = "perf-overlay";
+                    el.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:99;margin:0;padding:8px 10px;" +
+                        "font:12px/1.4 monospace;color:#fff;background:rgba(0,0,0,.75);border-radius:6px;pointer-events:none";
+                    document.body.appendChild(el);
+                }
+                el.textContent = lines.join("\n");
+            }
+        };
+    </script>
+
+    <script src="index.js"></script>
+
+    <script>
+        const loading = document.getElementById("loading");
+        const progress = document.getElementById("progress");
+        const status = document.getElementById("status");
+        const canvas = document.getElementById("game");
+
+        const engine = new Engine({"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":2607068,"index.wasm":26574938},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4});
+
+        engine.startGame({
+            canvas: canvas,
+
+            onProgress: function (current, total) {
+                if (total > 0) {
+                    const percent = Math.min(100, (current / total) * 100);
+
+                    if (percent >= 100) {
+                        // Downloading is finished, but Godot may still be
+                        // initializing the engine and starting the first scene.
+                        progress.classList.add("indeterminate");
+                        progress.style.width = "35%";
+                        status.textContent = "Starter visualiseringen...";
+                    } else {
+                        progress.classList.remove("indeterminate");
+                        progress.style.width = percent + "%";
+                        status.textContent = Math.round(percent) + "%";
+                    }
+                } else {
+                    progress.classList.add("indeterminate");
+                    status.textContent = "Forbereder...";
+                }
+            }
+        }).then(function () {
+            // startGame() resolves when Godot has actually started the game,
+            // so only remove the loading screen at this point.
+            window.__perfMark("engine-started");
+            window.__perfAfterStart();
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () { window.__perfMark("first-frame-drawn"); });
+            });
+            progress.classList.remove("indeterminate");
+            progress.style.width = "100%";
+            status.textContent = "";
+
+            loading.classList.add("hidden");
+
+            setTimeout(function () {
+                loading.remove();
+            }, 350);
+        }).catch(function (error) {
+            status.textContent = "Der opstod en fejl under indlæsningen.";
+            progress.classList.remove("indeterminate");
+            progress.style.width = "100%";
+            console.error(error);
+        });
+    </script>
+</body>
+</html>
+
